@@ -1,0 +1,9 @@
+{
+  "name": "track-event",
+  "version": "1.0.0",
+  "description": "数据埋点云函数",
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/node-sdk": "latest"
+  }
+}

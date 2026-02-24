@@ -1,0 +1,6 @@
+{
+  "name": "breed-identify",
+  "version": "1.0.0",
+  "description": "宠物品种识别云函数 - 调用通义千问VL",
+  "main": "index.js"
+}
