@@ -231,9 +231,10 @@ function goHome() {
 
 .card-image-wrapper {
   margin: 20px 0;
-  border-radius: var(--radius);
+  border-radius: var(--radius-card);
   overflow: hidden;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 12px 34px rgba(180, 120, 100, 0.12);
+  border: 1px solid rgba(255, 180, 160, 0.25);
 }
 
 .card-image {
@@ -250,10 +251,10 @@ function goHome() {
   width: 100%;
   margin-top: 12px;
   padding: 12px;
-  background: rgba(78, 205, 196, 0.1);
-  border: 1px dashed rgba(78, 205, 196, 0.4);
-  border-radius: var(--radius);
-  color: #4ECDC4;
+  background: linear-gradient(180deg, #F0FFF5 0%, #E8FAF0 100%);
+  border: 1px dashed rgba(126, 217, 166, 0.5);
+  border-radius: 14px;
+  color: #3DA06B;
   font-size: 14px;
   cursor: default;
 }
@@ -262,15 +263,15 @@ function goHome() {
 .group-cta {
   margin: 28px 0;
   padding: 24px;
-  background: rgba(255, 107, 107, 0.08);
-  border: 2px solid rgba(255, 107, 107, 0.2);
-  border-radius: var(--radius);
+  background: linear-gradient(180deg, #FFFAF8 0%, #FFF5F0 100%);
+  border: 1.5px solid rgba(255, 180, 160, 0.3);
+  border-radius: var(--radius-card);
   cursor: pointer;
   transition: all 0.3s;
 }
 
 .group-cta:active {
-  background: rgba(255, 107, 107, 0.15);
+  background: #FFF0EB;
 }
 
 .cta-content {
@@ -321,6 +322,7 @@ function goHome() {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  border: 1px solid #F3F4F6;
 }
 
 .qr-icon {
@@ -329,13 +331,13 @@ function goHome() {
 
 .qr-text {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
 .qr-hint {
   font-size: 11px;
-  color: #999;
+  color: var(--text-muted);
 }
 
 /* 对比卡弹窗 */
@@ -345,7 +347,9 @@ function goHome() {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(12, 24, 48, 0.42);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -354,8 +358,10 @@ function goHome() {
 }
 
 .comparison-modal {
-  background: var(--bg-card);
-  border-radius: var(--radius);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFAF8 100%);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 180, 160, 0.25);
+  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.2);
   padding: 20px;
   max-width: 400px;
   width: 100%;
@@ -376,17 +382,28 @@ function goHome() {
 }
 
 .modal-close {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 24px;
+  background: #fff;
+  border: 1px solid #FFD4CC;
+  color: #8A94A7;
+  font-size: 22px;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:active {
+  background: #FFF0F2;
+  transform: scale(0.97);
 }
 
 .comparison-image {
   width: 100%;
-  border-radius: var(--radius-sm);
+  border-radius: 16px;
 }
 
 /* 重新制作 */

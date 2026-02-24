@@ -22,7 +22,7 @@ onMounted(() => {
   max-width: 750px;
   margin: 0 auto;
   min-height: 100vh;
-  background: #1a1a2e;
+  background: #FFF8F5;
   position: relative;
   overflow-x: hidden;
 }

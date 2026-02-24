@@ -267,8 +267,8 @@ function goNext() {
 .upload-area {
   width: 100%;
   min-height: 280px;
-  border: 3px dashed rgba(255, 107, 107, 0.4);
-  border-radius: var(--radius);
+  border: 3px dashed rgba(255, 180, 160, 0.5);
+  border-radius: var(--radius-card);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -277,18 +277,19 @@ function goNext() {
   transition: all 0.3s;
   position: relative;
   overflow: hidden;
-  background: rgba(15, 52, 96, 0.3);
+  background: linear-gradient(180deg, #FFF5F0 0%, #FFEDE8 100%);
 }
 
 .upload-area:active {
   border-color: var(--primary);
-  background: rgba(255, 107, 107, 0.05);
+  background: #FFF0F2;
 }
 
 .upload-area.has-photo {
   border-style: solid;
   border-color: var(--primary);
   min-height: 360px;
+  background: #fff;
 }
 
 .upload-icon {
@@ -320,9 +321,9 @@ function goNext() {
   left: 0;
   right: 0;
   padding: 12px;
-  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  background: linear-gradient(transparent, rgba(0,0,0,0.5));
   text-align: center;
-  color: rgba(255,255,255,0.8);
+  color: rgba(255,255,255,0.9);
   font-size: 14px;
 }
 
@@ -334,30 +335,33 @@ function goNext() {
 
 .result-card {
   padding: 24px;
-  border-radius: var(--radius);
+  border-radius: var(--radius-card);
   text-align: center;
   margin-bottom: 16px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFAF8 100%);
+  box-shadow: 0 8px 24px rgba(180, 120, 100, 0.08);
+  border: 1px solid rgba(255, 180, 160, 0.20);
 }
 
 .high-confidence {
-  background: rgba(78, 205, 196, 0.1);
-  border: 2px solid rgba(78, 205, 196, 0.3);
+  border-color: rgba(126, 217, 166, 0.4);
+  background: linear-gradient(180deg, #F0FFF5 0%, #FFFFFF 100%);
 }
 
 .mid-confidence {
-  background: rgba(255, 230, 109, 0.1);
-  border: 2px solid rgba(255, 230, 109, 0.3);
+  border-color: rgba(255, 214, 102, 0.4);
+  background: linear-gradient(180deg, #FFFBF0 0%, #FFFFFF 100%);
 }
 
 .low-confidence {
-  background: rgba(255, 107, 107, 0.1);
-  border: 2px solid rgba(255, 107, 107, 0.3);
+  border-color: rgba(255, 107, 129, 0.3);
+  background: linear-gradient(180deg, #FFF5F5 0%, #FFFFFF 100%);
 }
 
 .result-breed {
   font-size: 36px;
-  font-weight: 800;
-  color: #4ECDC4;
+  font-weight: 900;
+  color: var(--primary);
   margin-bottom: 8px;
 }
 
@@ -369,7 +373,7 @@ function goNext() {
 
 .result-hint {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-main);
   margin-bottom: 16px;
 }
@@ -402,14 +406,14 @@ function goNext() {
   margin: 8px 0;
   background: var(--bg-input);
   border: 2px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: 14px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .candidate-item.active {
   border-color: var(--primary);
-  background: rgba(255, 107, 107, 0.1);
+  background: #FFF0F2;
 }
 
 .candidate-num {
@@ -431,6 +435,7 @@ function goNext() {
   font-size: 18px;
   font-weight: 600;
   text-align: left;
+  color: var(--text-main);
 }
 
 .candidate-pct {
@@ -458,15 +463,16 @@ function goNext() {
   padding: 12px;
   text-align: center;
   background: var(--bg-input);
-  border-radius: var(--radius-sm);
+  border-radius: 14px;
   cursor: pointer;
   font-size: 16px;
   font-weight: 600;
   transition: all 0.2s;
+  color: var(--text-secondary);
 }
 
 .breed-tab.active {
-  background: rgba(255, 107, 107, 0.15);
+  background: #FFF0F2;
   color: var(--primary);
 }
 
@@ -480,15 +486,16 @@ function goNext() {
   padding: 10px 16px;
   background: var(--bg-input);
   border: 2px solid transparent;
-  border-radius: var(--radius-tag);
+  border-radius: 999px;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
+  color: var(--text-secondary);
 }
 
 .breed-option.active {
   border-color: var(--primary);
-  background: rgba(255, 107, 107, 0.1);
+  background: #FFF0F2;
   color: var(--primary);
 }
 
@@ -508,11 +515,11 @@ function goNext() {
   width: 100%;
   margin-top: 24px;
   padding: 20px;
-  background: rgba(255, 107, 107, 0.1);
-  border: 1px solid rgba(255, 107, 107, 0.3);
-  border-radius: var(--radius);
+  background: #FFF0F2;
+  border: 1px solid rgba(255, 107, 129, 0.3);
+  border-radius: var(--radius-card);
   text-align: center;
-  color: var(--primary);
+  color: var(--primary-dark);
 }
 
 /* 底部操作栏 */
@@ -524,6 +531,6 @@ function goNext() {
   max-width: 750px;
   margin: 0 auto;
   padding: 16px 20px;
-  background: linear-gradient(transparent, var(--bg-dark) 30%);
+  background: linear-gradient(transparent, var(--bg) 30%);
 }
 </style>

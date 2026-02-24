@@ -4,7 +4,7 @@ export function useCardGenerator() {
   const generating = ref(false)
   const cardImageUrl = ref(null)
 
-  // 生成名片主图（玩梗系风格）
+  // 生成名片主图（暖色浅底风格）
   async function generateCard(cardData) {
     generating.value = true
 
@@ -23,7 +23,7 @@ export function useCardGenerator() {
       // 宠物头像
       await drawAvatar(ctx, cardData.photoUrl)
 
-      // 品种名称（大字 + 玩梗装饰）
+      // 品种名称（大字 + 装饰）
       drawBreedName(ctx, cardData.breed)
 
       // 宠物信息
@@ -83,31 +83,34 @@ export function useCardGenerator() {
   }
 }
 
-// ============ Canvas 绘制函数 ============
+// ============ Canvas 绘制函数（暖色浅底风格） ============
 
 function drawBackground(ctx) {
-  // 深色渐变背景
+  // 暖色渐变背景
   const gradient = ctx.createLinearGradient(0, 0, 0, 1920)
-  gradient.addColorStop(0, '#1a1a2e')
-  gradient.addColorStop(0.5, '#16213e')
-  gradient.addColorStop(1, '#0f3460')
+  gradient.addColorStop(0, '#FFFAF8')
+  gradient.addColorStop(0.4, '#FFE8E0')
+  gradient.addColorStop(0.7, '#FFF3EE')
+  gradient.addColorStop(1, '#FFF8F5')
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, 1080, 1920)
 
   // 装饰性圆形光晕
-  drawGlow(ctx, 200, 300, 250, 'rgba(255, 107, 107, 0.08)')
-  drawGlow(ctx, 880, 1400, 300, 'rgba(78, 205, 196, 0.06)')
-  drawGlow(ctx, 540, 900, 200, 'rgba(255, 230, 109, 0.05)')
+  drawGlow(ctx, 200, 300, 250, 'rgba(255, 107, 129, 0.06)')
+  drawGlow(ctx, 880, 1400, 300, 'rgba(255, 214, 102, 0.06)')
+  drawGlow(ctx, 540, 900, 200, 'rgba(126, 217, 166, 0.05)')
 
-  // 顶部装饰线条
-  ctx.strokeStyle = 'rgba(255, 107, 107, 0.3)'
-  ctx.lineWidth = 3
-  ctx.setLineDash([20, 10])
+  // 顶部装饰渐变线
+  const lineGrad = ctx.createLinearGradient(40, 0, 1040, 0)
+  lineGrad.addColorStop(0, '#FF6B81')
+  lineGrad.addColorStop(0.5, '#FFB074')
+  lineGrad.addColorStop(1, '#FFD666')
+  ctx.strokeStyle = lineGrad
+  ctx.lineWidth = 4
   ctx.beginPath()
   ctx.moveTo(40, 80)
   ctx.lineTo(1040, 80)
   ctx.stroke()
-  ctx.setLineDash([])
 }
 
 function drawGlow(ctx, x, y, radius, color) {
@@ -121,16 +124,17 @@ function drawGlow(ctx, x, y, radius, color) {
 }
 
 function drawHeader(ctx) {
-  // "我家毛孩子的名片" 标题
+  // 品牌小字
   ctx.textAlign = 'center'
-  ctx.font = 'bold 36px "PingFang SC", sans-serif'
-  ctx.fillStyle = '#FFE66D'
-  ctx.fillText('🐾 我家毛孩子的名片 🐾', 540, 140)
+  ctx.font = '600 22px "PingFang SC", sans-serif'
+  ctx.fillStyle = '#C4A68C'
+  ctx.letterSpacing = '2px'
+  ctx.fillText('— 萌宠联萌出品 —', 540, 130)
 
-  // 副标题装饰
-  ctx.font = '22px "PingFang SC", sans-serif'
-  ctx.fillStyle = 'rgba(168, 178, 209, 0.7)'
-  ctx.fillText('— 萌宠联萌出品 —', 540, 185)
+  // 主标题
+  ctx.font = '900 36px "PingFang SC", sans-serif'
+  ctx.fillStyle = '#2D2A26'
+  ctx.fillText('🐾 我家毛孩子的名片 🐾', 540, 175)
 }
 
 function drawAvatar(ctx, photoUrl, size = 320) {
@@ -145,15 +149,15 @@ function drawAvatar(ctx, photoUrl, size = 320) {
       ctx.beginPath()
       ctx.arc(cx, cy, r, 0, Math.PI * 2)
       ctx.closePath()
-      ctx.fillStyle = '#0f3460'
+      ctx.fillStyle = '#FFF0F2'
       ctx.fill()
-      ctx.strokeStyle = 'rgba(255, 107, 107, 0.5)'
+      ctx.strokeStyle = '#FF6B81'
       ctx.lineWidth = 6
       ctx.stroke()
 
       ctx.font = '80px sans-serif'
       ctx.textAlign = 'center'
-      ctx.fillStyle = '#fff'
+      ctx.fillStyle = '#FF6B81'
       ctx.fillText('🐱', cx, cy + 30)
       ctx.restore()
       resolve()
@@ -166,6 +170,17 @@ function drawAvatar(ctx, photoUrl, size = 320) {
       const cx = 540
       const cy = 430
       const r = size / 2
+
+      // 头像阴影
+      ctx.save()
+      ctx.shadowColor = 'rgba(255, 107, 129, 0.25)'
+      ctx.shadowBlur = 28
+      ctx.shadowOffsetY = 8
+      ctx.beginPath()
+      ctx.arc(cx, cy, r, 0, Math.PI * 2)
+      ctx.fillStyle = '#FFF0F2'
+      ctx.fill()
+      ctx.restore()
 
       ctx.save()
       // 圆形裁剪
@@ -194,7 +209,7 @@ function drawAvatar(ctx, photoUrl, size = 320) {
       // 头像边框
       ctx.beginPath()
       ctx.arc(cx, cy, r, 0, Math.PI * 2)
-      ctx.strokeStyle = '#FF6B6B'
+      ctx.strokeStyle = '#FF6B81'
       ctx.lineWidth = 6
       ctx.stroke()
 
@@ -214,7 +229,7 @@ function drawAvatar(ctx, photoUrl, size = 320) {
       const r = size / 2
       ctx.beginPath()
       ctx.arc(cx, cy, r, 0, Math.PI * 2)
-      ctx.fillStyle = '#0f3460'
+      ctx.fillStyle = '#FFF0F2'
       ctx.fill()
       ctx.font = '80px sans-serif'
       ctx.textAlign = 'center'
@@ -230,13 +245,16 @@ function drawBreedName(ctx, breed) {
 
   // 品种名称大字
   ctx.textAlign = 'center'
-  ctx.font = 'bold 56px "PingFang SC", sans-serif'
-  ctx.fillStyle = '#ffffff'
+  ctx.font = '900 56px "PingFang SC", sans-serif'
+  ctx.fillStyle = '#2D2A26'
   ctx.fillText(breed || '神秘品种', 540, y)
 
   // 底部装饰线
   const textWidth = ctx.measureText(breed || '神秘品种').width
-  ctx.strokeStyle = '#FF6B6B'
+  const lineGrad = ctx.createLinearGradient(540 - textWidth / 2 - 20, 0, 540 + textWidth / 2 + 20, 0)
+  lineGrad.addColorStop(0, '#FF6B81')
+  lineGrad.addColorStop(1, '#FFB074')
+  ctx.strokeStyle = lineGrad
   ctx.lineWidth = 4
   ctx.beginPath()
   ctx.moveTo(540 - textWidth / 2 - 20, y + 15)
@@ -249,12 +267,12 @@ function drawBreedName(ctx, breed) {
   const badgeText = '✓ 已认证萌宠'
   const badgeWidth = ctx.measureText(badgeText).width + 24
   roundRect(ctx, 540 - badgeWidth / 2, badgeY - 18, badgeWidth, 32, 16)
-  ctx.fillStyle = 'rgba(78, 205, 196, 0.2)'
+  ctx.fillStyle = 'rgba(126, 217, 166, 0.15)'
   ctx.fill()
-  ctx.strokeStyle = '#4ECDC4'
+  ctx.strokeStyle = '#7ED9A6'
   ctx.lineWidth = 1.5
   ctx.stroke()
-  ctx.fillStyle = '#4ECDC4'
+  ctx.fillStyle = '#3DA06B'
   ctx.textAlign = 'center'
   ctx.fillText(badgeText, 540, badgeY + 5)
 }
@@ -275,9 +293,9 @@ function drawPetInfo(ctx, data) {
   // 信息卡片背景
   const cardH = items.length * 58 + 40
   roundRect(ctx, 60, startY - 20, 960, cardH, 20)
-  ctx.fillStyle = 'rgba(15, 52, 96, 0.6)'
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
   ctx.fill()
-  ctx.strokeStyle = 'rgba(255, 107, 107, 0.15)'
+  ctx.strokeStyle = 'rgba(255, 180, 160, 0.25)'
   ctx.lineWidth = 1
   ctx.stroke()
 
@@ -291,12 +309,12 @@ function drawPetInfo(ctx, data) {
 
     // label
     ctx.font = '24px "PingFang SC", sans-serif'
-    ctx.fillStyle = 'rgba(168, 178, 209, 0.8)'
+    ctx.fillStyle = '#8C7E73'
     ctx.fillText(item.label, 145, y)
 
     // value
     ctx.font = 'bold 26px "PingFang SC", sans-serif'
-    ctx.fillStyle = '#ffffff'
+    ctx.fillStyle = '#2D2A26'
     ctx.fillText(item.value || '—', 260, y)
   })
 }
@@ -306,11 +324,15 @@ function drawTags(ctx, tags) {
 
   const y = 1130
   ctx.textAlign = 'center'
-  ctx.font = '22px "PingFang SC", sans-serif'
-  ctx.fillStyle = '#FFE66D'
+  ctx.font = '900 22px "PingFang SC", sans-serif'
+  ctx.fillStyle = '#2D2A26'
   ctx.fillText('— 性格标签 —', 540, y)
 
-  const tagColors = ['#FF6B6B', '#4ECDC4', '#FFE66D']
+  const tagStyles = [
+    { bg: '#FFF0F2', color: '#E8556A', border: '#FFD4CC' },
+    { bg: '#FFF8E6', color: '#C8930A', border: '#FFE8A0' },
+    { bg: '#F0FFF5', color: '#3DA06B', border: '#B8E8CC' }
+  ]
   const tagY = y + 50
   const totalWidth = tags.reduce((sum, tag, i) => {
     ctx.font = 'bold 28px "PingFang SC", sans-serif'
@@ -321,18 +343,18 @@ function drawTags(ctx, tags) {
   tags.forEach((tag, i) => {
     ctx.font = 'bold 28px "PingFang SC", sans-serif'
     const w = ctx.measureText(tag).width + 48
-    const color = tagColors[i % tagColors.length]
+    const style = tagStyles[i % tagStyles.length]
 
     // 标签背景
     roundRect(ctx, x, tagY - 22, w, 48, 24)
-    ctx.fillStyle = color + '25'
+    ctx.fillStyle = style.bg
     ctx.fill()
-    ctx.strokeStyle = color
-    ctx.lineWidth = 2
+    ctx.strokeStyle = style.border
+    ctx.lineWidth = 1.5
     ctx.stroke()
 
     // 标签文字
-    ctx.fillStyle = color
+    ctx.fillStyle = style.color
     ctx.textAlign = 'center'
     ctx.fillText(tag, x + w / 2, tagY + 8)
 
@@ -345,33 +367,28 @@ function drawSignature(ctx, signature) {
 
   ctx.textAlign = 'center'
   ctx.font = 'italic 26px "PingFang SC", sans-serif'
-  ctx.fillStyle = 'rgba(168, 178, 209, 0.9)'
+  ctx.fillStyle = '#8C7E73'
   ctx.fillText(`"${signature}"`, 540, y)
 }
 
 async function drawFooter(ctx, breed) {
   const y = 1450
 
-  // 分割线
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  ctx.moveTo(60, y)
-  ctx.lineTo(1020, y)
-  ctx.stroke()
-
   // 进群 CTA 区域背景
   roundRect(ctx, 60, y + 30, 960, 350, 20)
-  ctx.fillStyle = 'rgba(255, 107, 107, 0.08)'
+  const ctaGrad = ctx.createLinearGradient(60, y + 30, 60, y + 380)
+  ctaGrad.addColorStop(0, 'rgba(255, 240, 235, 0.8)')
+  ctaGrad.addColorStop(1, 'rgba(255, 228, 218, 0.8)')
+  ctx.fillStyle = ctaGrad
   ctx.fill()
-  ctx.strokeStyle = 'rgba(255, 107, 107, 0.2)'
-  ctx.lineWidth = 2
+  ctx.strokeStyle = 'rgba(255, 180, 160, 0.3)'
+  ctx.lineWidth = 1.5
   ctx.stroke()
 
   // CTA 文案
   ctx.textAlign = 'center'
   ctx.font = 'bold 32px "PingFang SC", sans-serif'
-  ctx.fillStyle = '#FF6B6B'
+  ctx.fillStyle = '#FF6B81'
   ctx.fillText(`加入${breed || '同品种'}群`, 540, y + 85)
   ctx.fillText('找到同类人 🎉', 540, y + 130)
 
@@ -383,15 +400,17 @@ async function drawFooter(ctx, breed) {
   roundRect(ctx, qrX, qrY, qrSize, qrSize, 12)
   ctx.fillStyle = '#ffffff'
   ctx.fill()
+  ctx.strokeStyle = 'rgba(255, 180, 160, 0.2)'
+  ctx.lineWidth = 1
+  ctx.stroke()
 
-  // 占位文字（实际使用时替换为真实二维码图片）
+  // 占位文字
   ctx.font = '16px "PingFang SC", sans-serif'
-  ctx.fillStyle = '#999'
+  ctx.fillStyle = '#8C7E73'
   ctx.textAlign = 'center'
   ctx.fillText('扫码加入', 540, qrY + qrSize / 2 + 6)
 
   // TODO: 加载真实企微二维码图片
-  // 占位标记
   ctx.font = '40px sans-serif'
   ctx.fillText('📱', 540, qrY + qrSize / 2 - 20)
 }
@@ -399,23 +418,23 @@ async function drawFooter(ctx, breed) {
 function drawWatermark(ctx) {
   ctx.textAlign = 'center'
   ctx.font = '20px "PingFang SC", sans-serif'
-  ctx.fillStyle = 'rgba(168, 178, 209, 0.4)'
+  ctx.fillStyle = '#C4A68C'
   ctx.fillText('萌宠联萌 · 同品种社交名片', 540, 1880)
   ctx.font = '16px "PingFang SC", sans-serif'
-  ctx.fillStyle = 'rgba(168, 178, 209, 0.25)'
+  ctx.fillStyle = 'rgba(196, 166, 140, 0.6)'
   ctx.fillText('长按保存图片 · 分享给同品种的朋友', 540, 1905)
 }
 
 // 对比卡专用绘制函数
 function drawComparisonHeader(ctx) {
   ctx.textAlign = 'center'
-  ctx.font = 'bold 36px "PingFang SC", sans-serif'
-  ctx.fillStyle = '#4ECDC4'
-  ctx.fillText('📊 同品种对比卡 📊', 540, 140)
+  ctx.font = '600 22px "PingFang SC", sans-serif'
+  ctx.fillStyle = '#C4A68C'
+  ctx.fillText('— 萌宠联萌出品 —', 540, 130)
 
-  ctx.font = '22px "PingFang SC", sans-serif'
-  ctx.fillStyle = 'rgba(168, 178, 209, 0.7)'
-  ctx.fillText('— 看看你家在同品种里的排名 —', 540, 185)
+  ctx.font = '900 36px "PingFang SC", sans-serif'
+  ctx.fillStyle = '#2D2A26'
+  ctx.fillText('📊 同品种对比卡 📊', 540, 175)
 }
 
 function drawComparisonStats(ctx, cardData, stats) {
@@ -431,22 +450,25 @@ function drawComparisonStats(ctx, cardData, stats) {
 
     // 卡片
     roundRect(ctx, 80, y - 30, 920, 100, 16)
-    ctx.fillStyle = 'rgba(15, 52, 96, 0.6)'
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
     ctx.fill()
+    ctx.strokeStyle = 'rgba(255, 180, 160, 0.25)'
+    ctx.lineWidth = 1
+    ctx.stroke()
 
     ctx.textAlign = 'left'
     ctx.font = '24px "PingFang SC", sans-serif'
-    ctx.fillStyle = '#a8b2d1'
+    ctx.fillStyle = '#8C7E73'
     ctx.fillText(item.label, 120, y + 10)
 
     ctx.textAlign = 'right'
     ctx.font = 'bold 32px "PingFang SC", sans-serif'
-    ctx.fillStyle = '#FFE66D'
+    ctx.fillStyle = '#FF6B81'
     ctx.fillText(item.value, 960, y + 10)
 
     if (item.sub) {
       ctx.font = '18px "PingFang SC", sans-serif'
-      ctx.fillStyle = '#4ECDC4'
+      ctx.fillStyle = '#3DA06B'
       ctx.fillText(item.sub, 960, y + 42)
     }
   })

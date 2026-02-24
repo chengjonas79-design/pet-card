@@ -211,9 +211,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   padding: 16px 20px;
-  background: rgba(78, 205, 196, 0.1);
-  border: 1px solid rgba(78, 205, 196, 0.3);
-  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, #FFF0F2 0%, #FFF5F0 100%);
+  border: 1px solid rgba(255, 180, 160, 0.3);
+  border-radius: 14px;
   margin-bottom: 28px;
 }
 
@@ -225,14 +225,14 @@ onMounted(() => {
 .breed-value {
   font-size: 20px;
   font-weight: 700;
-  color: #4ECDC4;
+  color: var(--primary);
   flex: 1;
   margin-left: 8px;
 }
 
 .breed-edit {
-  background: none;
-  border: 1px solid var(--text-muted);
+  background: #fff;
+  border: 1px solid rgba(255, 180, 160, 0.4);
   color: var(--text-muted);
   padding: 4px 12px;
   border-radius: 12px;
@@ -259,15 +259,17 @@ onMounted(() => {
   padding: 14px;
   background: var(--bg-input);
   border: 2px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: 14px;
   cursor: pointer;
   font-size: 16px;
   transition: all 0.2s;
+  color: var(--text-secondary);
 }
 
 .gender-item.active {
   border-color: var(--primary);
-  background: rgba(255, 107, 107, 0.1);
+  background: #FFF0F2;
+  color: var(--primary);
 }
 
 .gender-icon {
@@ -313,7 +315,7 @@ onMounted(() => {
   content: '';
   flex: 1;
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: #eee;
 }
 
 .section-divider span {
@@ -337,6 +339,6 @@ onMounted(() => {
   max-width: 750px;
   margin: 0 auto;
   padding: 16px 20px;
-  background: linear-gradient(transparent, var(--bg-dark) 30%);
+  background: linear-gradient(transparent, var(--bg) 30%);
 }
 </style>
