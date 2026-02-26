@@ -23,7 +23,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">性别 *</label>
+        <label class="form-label">性别</label>
         <div class="gender-options">
           <div
             v-for="g in genderOptions"
@@ -39,7 +39,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">年龄 *</label>
+        <label class="form-label">年龄</label>
         <input
           v-model="form.age"
           class="form-input"
@@ -62,7 +62,7 @@
     <!-- 性格标签 -->
     <div class="form-section">
       <label class="form-label">
-        性格标签 * <span class="tag-count">（已选 {{ form.tags.length }}/3）</span>
+        性格标签 * <span class="tag-count">（至少选1个，当前 {{ form.tags.length }}/3）</span>
       </label>
       <div
         v-for="category in tagCategories"
@@ -126,7 +126,7 @@
         :disabled="!canGenerate"
         @click="generateCard"
       >
-        生成名片 🎨
+        生成分享名片 🎨
       </button>
     </div>
   </div>
@@ -136,6 +136,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { tagCategories } from '../data/tags'
+import { trackEvent, trackFunnel, EVENTS, FUNNEL_STEPS } from '../utils/tracking'
 
 const router = useRouter()
 
@@ -161,10 +162,8 @@ const timeOptions = ['工作日白天', '工作日晚上', '周末上午', '周�
 
 const canGenerate = computed(() => {
   return form.nickname &&
-    form.gender &&
-    form.age &&
     form.city &&
-    form.tags.length === 3
+    form.tags.length >= 1
 })
 
 function toggleTag(tag) {
@@ -188,6 +187,18 @@ function generateCard() {
     ...cardData.value,
     ...form
   }
+
+  trackEvent(EVENTS.INFO_SUBMITTED, {
+    breed: cardData.value.breed,
+    tag_count: form.tags.length,
+    has_signature: Boolean(form.signature),
+    has_available_time: Boolean(form.availableTime)
+  })
+
+  trackFunnel(FUNNEL_STEPS.INFO_SUBMITTED, {
+    breed: cardData.value.breed
+  })
+
   sessionStorage.setItem('pet_card_data', JSON.stringify(fullData))
   router.push('/card')
 }
@@ -196,6 +207,13 @@ onMounted(() => {
   const stored = sessionStorage.getItem('pet_card_data')
   if (stored) {
     cardData.value = JSON.parse(stored)
+    form.nickname = cardData.value.nickname || ''
+    form.gender = cardData.value.gender || ''
+    form.age = cardData.value.age || ''
+    form.city = cardData.value.city || ''
+    form.tags = Array.isArray(cardData.value.tags) ? [...cardData.value.tags] : []
+    form.signature = cardData.value.signature || ''
+    form.availableTime = cardData.value.availableTime || ''
   } else {
     router.replace('/')
   }

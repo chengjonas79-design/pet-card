@@ -21,10 +21,11 @@
             {
               "name": "breed-identify",
               "timeout": 30,
-              "runtime": "Nodejs16.13",
+              "runtime": "Nodejs18.15",
               "memory": 256,
               "envVariables": {
-                "DASHSCOPE_API_KEY": "{{env.DASHSCOPE_API_KEY}}"
+                "CLOUDBASE_AI_MODEL_GROUP": "{{env.CLOUDBASE_AI_MODEL_GROUP}}",
+                "CLOUDBASE_AI_MODEL_NAME": "{{env.CLOUDBASE_AI_MODEL_NAME}}"
               }
             },
             {

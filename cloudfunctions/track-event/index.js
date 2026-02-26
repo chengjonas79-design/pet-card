@@ -2,7 +2,7 @@
  * 云函数：track-event
  * 数据埋点记录
  *
- * 入参: { event, timestamp, source, ... }
+ * 入参: { event, event_id, session_id, visitor_id, funnel_step, ... }
  */
 const tcb = require('@cloudbase/node-sdk')
 
@@ -17,15 +17,28 @@ exports.main = async (event) => {
   }
 
   try {
-    await db.collection('events').add({
+    const timestamp = Number.isFinite(params.timestamp) ? params.timestamp : Date.now()
+
+    const res = await db.collection('events').add({
       event: eventName,
+      eventId: params.event_id || '',
+      eventSchema: params.event_schema || '',
+      visitorId: params.visitor_id || '',
+      sessionId: params.session_id || '',
+      funnelStep: params.funnel_step || '',
+      pagePath: params.page_path || '',
+      source: params.source || 'direct',
+      shareId: params.share_id || '',
+      inviterId: params.inviter_id || '',
+      isSharedEntry: Boolean(params.is_shared_entry),
       params,
-      createdAt: new Date(),
+      createdAt: new Date(timestamp),
+      serverReceivedAt: new Date(),
       // CloudBase 会自动注入 OPENID
-      _openid: event.userInfo?.openId || ''
+      _openid: event.userInfo?.openId || event?.wxContext?.OPENID || ''
     })
 
-    return { success: true }
+    return { success: true, id: res.id }
   } catch (err) {
     console.error('埋点记录失败:', err)
     return { error: '记录失败', message: err.message }

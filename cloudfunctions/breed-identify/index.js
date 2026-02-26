@@ -1,60 +1,28 @@
 /**
  * 云函数：breed-identify
- * 调用通义千问VL多模态模型识别宠物品种
+ * 基于 CloudBase AI（默认混元）识别宠物品种
  *
  * 入参: { image: "base64图片数据" }
- * 出参: { breed, confidence, candidates, petType }
+ * 出参: { breed, confidence, candidates, petType, multiPet, description }
  */
-const https = require('https')
+const tcb = require('@cloudbase/node-sdk')
 
-// TODO: 替换为真实的通义千问 API Key
-// 在 CloudBase 控制台 -> 云函数 -> 环境变量中配置 DASHSCOPE_API_KEY
-const API_KEY = process.env.DASHSCOPE_API_KEY || 'your-dashscope-api-key'
+const app = tcb.init({ env: tcb.SYMBOL_CURRENT_ENV })
+const ai = app.ai()
 
-exports.main = async (event) => {
-  const { image } = event
+// 通过环境变量配置模型分组与模型名，方便后续切换 DeepSeek/自定义模型组
+const MODEL_GROUP = process.env.CLOUDBASE_AI_MODEL_GROUP || 'hunyuan-exp'
+const MODEL_NAME = process.env.CLOUDBASE_AI_MODEL_NAME || 'hunyuan-vision'
 
-  if (!image) {
-    return { error: '缺少图片数据' }
-  }
-
-  // 去除 base64 前缀
-  const base64Data = image.replace(/^data:image\/\w+;base64,/, '')
-
-  try {
-    const result = await callQwenVL(base64Data)
-    return result
-  } catch (err) {
-    console.error('通义千问调用失败:', err)
-    return {
-      error: '识别失败',
-      breed: '',
-      confidence: 0,
-      candidates: [],
-      petType: 'unknown'
-    }
-  }
-}
-
-function callQwenVL(imageBase64) {
-  return new Promise((resolve, reject) => {
-    const requestBody = JSON.stringify({
-      model: 'qwen-vl-plus',
-      input: {
-        messages: [
-          {
-            role: 'system',
-            content: [
-              {
-                text: `你是一个专业的宠物品种识别专家。请分析图片中的宠物，返回JSON格式结果。
+const SYSTEM_PROMPT = `你是专业宠物品种识别专家。请分析图片中的宠物并返回 JSON。
 
 规则：
-1. 如果图片中有宠物（猫或狗），识别其品种
-2. 如果图片中有多只宠物，识别最显眼/最大的那只
-3. 如果图片中没有宠物，返回 petType: "none"
-4. 给出置信度(0-1)和前3个候选品种
+1) 图片中有宠物（猫或狗）时，识别主宠物品种
+2) 多只宠物时，识别最显眼/最大的那只
+3) 没有宠物时返回 petType: "none"
+4) 给出 0-1 的置信度和前 3 个候选品种
 
-必须严格按以下JSON格式返回，不要包含任何其他文字：
+严格只返回 JSON，不要额外说明。格式如下：
 {
   "petType": "dog" | "cat" | "none",
   "breed": "品种名称",
@@ -67,88 +35,129 @@ function callQwenVL(imageBase64) {
   "multiPet": false,
   "description": "一句话描述"
 }`
-              }
-            ]
+
+exports.main = async (event) => {
+  const { image } = event
+
+  if (!image) {
+    return { error: '缺少图片数据' }
+  }
+
+  const { mediaType, imageBase64 } = parseImageData(image)
+
+  try {
+    const aiResult = await callCloudbaseAI({ imageBase64, mediaType })
+    return normalizeResult(aiResult)
+  } catch (err) {
+    console.error('[breed-identify] CloudBase AI 调用失败:', err)
+    return {
+      error: '识别失败',
+      breed: '',
+      confidence: 0,
+      candidates: [],
+      petType: 'unknown',
+      multiPet: false,
+      description: ''
+    }
+  }
+}
+
+async function callCloudbaseAI({ imageBase64, mediaType }) {
+  const model = ai.createModel(MODEL_GROUP)
+
+  // CloudBase AI SDK 会透传模型方参数；多模态输入按 OpenAI content 数组结构传递
+  const response = await model.generateText({
+    model: MODEL_NAME,
+    temperature: 0.1,
+    messages: [
+      {
+        role: 'system',
+        content: SYSTEM_PROMPT
+      },
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: '请识别这张图片中的宠物品种。'
           },
           {
-            role: 'user',
-            content: [
-              {
-                image: `data:image/jpeg;base64,${imageBase64}`
-              },
-              {
-                text: '请识别这张图片中的宠物品种。'
-              }
-            ]
+            type: 'image_url',
+            image_url: {
+              url: `data:${mediaType};base64,${imageBase64}`
+            }
           }
         ]
-      },
-      parameters: {
-        result_format: 'message'
       }
-    })
-
-    const options = {
-      hostname: 'dashscope.aliyuncs.com',
-      path: '/api/v1/services/aigc/multimodal-generation/generation',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`,
-        'Content-Length': Buffer.byteLength(requestBody)
-      }
-    }
-
-    const req = https.request(options, (res) => {
-      let data = ''
-      res.on('data', (chunk) => { data += chunk })
-      res.on('end', () => {
-        try {
-          const response = JSON.parse(data)
-
-          if (response.output?.choices?.[0]?.message?.content) {
-            const content = response.output.choices[0].message.content
-            // 提取文本内容
-            let textContent = ''
-            if (Array.isArray(content)) {
-              textContent = content.find(c => c.text)?.text || ''
-            } else {
-              textContent = content
-            }
-
-            // 解析JSON
-            const jsonMatch = textContent.match(/\{[\s\S]*\}/)
-            if (jsonMatch) {
-              const result = JSON.parse(jsonMatch[0])
-              resolve(result)
-            } else {
-              resolve({
-                breed: '',
-                confidence: 0,
-                candidates: [],
-                petType: 'unknown',
-                error: 'AI返回格式异常'
-              })
-            }
-          } else {
-            console.error('API响应异常:', data)
-            resolve({
-              breed: '',
-              confidence: 0,
-              candidates: [],
-              petType: 'unknown',
-              error: response.message || 'API响应异常'
-            })
-          }
-        } catch (e) {
-          console.error('解析响应失败:', e, data)
-          reject(e)
-        }
-      })
-    })
-
-    req.on('error', reject)
-    req.write(requestBody)
-    req.end()
+    ]
   })
+
+  return parseModelJson(response?.text || '')
+}
+
+function parseImageData(image) {
+  const dataUrlMatch = image.match(/^data:(image\/\w+);base64,(.+)$/)
+  if (dataUrlMatch) {
+    return {
+      mediaType: dataUrlMatch[1],
+      imageBase64: dataUrlMatch[2]
+    }
+  }
+
+  // 兼容直接传裸 base64 的情况
+  return {
+    mediaType: 'image/jpeg',
+    imageBase64: image
+  }
+}
+
+function parseModelJson(text) {
+  const payload = String(text || '').trim()
+  if (!payload) throw new Error('empty_model_response')
+
+  // 优先直接解析
+  try {
+    return JSON.parse(payload)
+  } catch (e) {
+    // 兜底解析 markdown/codeblock 包裹 JSON
+  }
+
+  const jsonMatch = payload.match(/\{[\s\S]*\}/)
+  if (!jsonMatch) {
+    throw new Error('invalid_json_response')
+  }
+
+  return JSON.parse(jsonMatch[0])
+}
+
+function normalizeResult(raw = {}) {
+  const petType = ['dog', 'cat', 'none'].includes(raw.petType) ? raw.petType : 'unknown'
+  const breed = String(raw.breed || '').trim()
+  const confidence = clamp01(Number(raw.confidence) || 0)
+
+  const candidates = Array.isArray(raw.candidates)
+    ? raw.candidates
+      .map((item) => ({
+        breed: String(item?.breed || '').trim(),
+        confidence: clamp01(Number(item?.confidence) || 0)
+      }))
+      .filter((item) => item.breed)
+      .slice(0, 3)
+    : []
+
+  return {
+    petType,
+    breed,
+    confidence,
+    candidates,
+    multiPet: Boolean(raw.multiPet),
+    description: String(raw.description || '').trim()
+  }
+}
+
+function clamp01(value) {
+  if (!Number.isFinite(value)) return 0
+  if (value < 0) return 0
+  if (value > 1) return 1
+  return Number(value.toFixed(4))
 }

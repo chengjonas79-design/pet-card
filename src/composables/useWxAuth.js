@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { callFunction } from '../utils/cloudbase'
+import { getTrackingContextSnapshot } from '../utils/tracking'
 
 // MVP-2: 微信授权登录（保存名片时触发）
 export function useWxAuth() {
@@ -24,10 +25,20 @@ export function useWxAuth() {
     if (checkAuth()) return true
 
     const appId = import.meta.env.VITE_WX_APPID
+    const fallbackOpenId = getStableFallbackOpenId()
+
+    // 非微信浏览器下直接走稳定 fallback，避免跳转失败影响主流程
+    if (!isWechatBrowser()) {
+      console.warn('[WxAuth] 当前不是微信浏览器，使用 fallback openid')
+      openId.value = fallbackOpenId
+      localStorage.setItem('pet_card_openid', fallbackOpenId)
+      isAuthed.value = true
+      return true
+    }
+
     if (!appId || appId === 'your-wechat-appid') {
       console.warn('[WxAuth] 未配置微信 AppID，跳过授权')
-      // 开发环境生成模拟 openid
-      openId.value = 'dev_' + Date.now()
+      openId.value = fallbackOpenId
       localStorage.setItem('pet_card_openid', openId.value)
       isAuthed.value = true
       return true
@@ -77,4 +88,16 @@ export function useWxAuth() {
     checkAuth,
     requestAuth
   }
+}
+
+function isWechatBrowser() {
+  const ua = window.navigator.userAgent || ''
+  return /micromessenger/i.test(ua)
+}
+
+function getStableFallbackOpenId() {
+  const tracking = getTrackingContextSnapshot()
+  const visitorId = tracking.visitor_id || ''
+  if (!visitorId) return `visitor_${Date.now()}`
+  return `visitor_${visitorId}`
 }

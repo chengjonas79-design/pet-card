@@ -45,13 +45,17 @@
 
     <!-- 识别结果 -->
     <div v-if="identifyResult && !identifying" class="result-section">
+      <div v-if="identifyMode === 'mock'" class="demo-mode-tip">
+        当前为演示识别模式（未接大模型），你可以继续完整体验后续流程。
+      </div>
+
       <!-- 高置信度: ≥80% -->
       <div v-if="identifyResult.confidence >= 0.8" class="result-card high-confidence">
         <div class="result-breed">{{ identifyResult.breed }}</div>
         <div class="result-confidence">
           AI 置信度 {{ Math.round(identifyResult.confidence * 100) }}%
         </div>
-        <button class="btn-change" @click="showManualSelect = true">
+        <button class="btn-change" @click="openManualSelect('high_confidence')">
           不对？点这里修改
         </button>
       </div>
@@ -65,14 +69,14 @@
             :key="i"
             class="candidate-item"
             :class="{ active: selectedBreed === c.breed }"
-            @click="selectedBreed = c.breed"
+            @click="onCandidateSelect(c, i)"
           >
             <span class="candidate-num">{{ i + 1 }}</span>
             <span class="candidate-name">{{ c.breed }}</span>
             <span class="candidate-pct">{{ Math.round(c.confidence * 100) }}%</span>
           </div>
         </div>
-        <button class="btn-change" @click="showManualSelect = true">
+        <button class="btn-change" @click="openManualSelect('mid_confidence')">
           都不对？手动选择
         </button>
       </div>
@@ -110,14 +114,14 @@
             :key="breed"
             class="breed-option"
             :class="{ active: selectedBreed === breed }"
-            @click="selectedBreed = breed"
+            @click="onBreedOptionSelect(breed, 'manual_list')"
           >
             {{ breed }}
           </div>
           <div
             class="breed-option mixed"
             :class="{ active: selectedBreed === '混血/不确定' }"
-            @click="selectedBreed = '混血/不确定'"
+            @click="onBreedOptionSelect('混血/不确定', 'manual_list')"
           >
             混血/不确定
           </div>
@@ -135,8 +139,11 @@
 
     <!-- 下一步按钮 -->
     <div v-if="canProceed" class="action-bar safe-bottom">
-      <button class="btn-primary" @click="goNext">
-        下一步：填写信息 ✏️
+      <button class="btn-primary" @click="goQuickGenerate">
+        30秒生成可分享卡 ⚡
+      </button>
+      <button class="btn-secondary btn-with-gap" @click="goNext">
+        完善资料再生成 ✏️
       </button>
     </div>
   </div>
@@ -146,7 +153,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBreedIdentify } from '../composables/useBreedIdentify'
-import { trackEvent, EVENTS } from '../utils/tracking'
+import { trackEvent, trackFunnel, EVENTS, FUNNEL_STEPS } from '../utils/tracking'
 import { hotBreeds } from '../data/breeds'
 
 const router = useRouter()
@@ -162,6 +169,7 @@ const {
   loading: identifying,
   result: identifyResult,
   error: identifyError,
+  identifyMode,
   identifyBreed
 } = useBreedIdentify()
 
@@ -208,7 +216,11 @@ async function onFileSelected(e) {
     selectedBreed.value = ''
     showManualSelect.value = false
 
-    trackEvent(EVENTS.PHOTO_UPLOAD)
+    trackEvent(EVENTS.PHOTO_UPLOAD, {
+      file_size: file.size || 0,
+      file_type: file.type || 'unknown'
+    })
+    trackFunnel(FUNNEL_STEPS.PHOTO_UPLOADED)
 
     // 调用品种识别
     try {
@@ -240,9 +252,82 @@ function goNext() {
     breed: finalBreed.value,
     breedModified: identifyResult.value?.breed !== finalBreed.value
   }
+
+  trackEvent(EVENTS.NEXT_TO_INFO, {
+    breed: finalBreed.value,
+    breed_modified: data.breedModified,
+    confidence_bucket: getConfidenceBucket(identifyResult.value?.confidence)
+  })
+
+  trackFunnel(FUNNEL_STEPS.HOME_TO_INFO, {
+    breed: finalBreed.value
+  })
+
   // 使用 sessionStorage 传递数据（避免 URL 过长）
   sessionStorage.setItem('pet_card_data', JSON.stringify(data))
   router.push('/info')
+}
+
+function goQuickGenerate() {
+  const breed = finalBreed.value
+  const data = {
+    photoUrl: photoPreview.value,
+    breed,
+    breedModified: identifyResult.value?.breed !== breed,
+    nickname: '我家毛孩子',
+    gender: '不确定',
+    age: '保密',
+    city: '同城',
+    tags: ['社交牛牛', '撒娇达人', '拍照模特'],
+    signature: '',
+    availableTime: '',
+    quickMode: true,
+    templateStyle: 'meme'
+  }
+
+  trackEvent(EVENTS.QUICK_GENERATE_CLICKED, {
+    breed,
+    confidence_bucket: getConfidenceBucket(identifyResult.value?.confidence)
+  })
+
+  trackFunnel(FUNNEL_STEPS.HOME_TO_CARD_QUICK, {
+    breed
+  })
+
+  sessionStorage.setItem('pet_card_data', JSON.stringify(data))
+  router.push('/card')
+}
+
+function openManualSelect(triggerFrom) {
+  showManualSelect.value = true
+  trackEvent(EVENTS.BREED_MANUAL_SELECT_OPENED, {
+    trigger_from: triggerFrom,
+    current_confidence: identifyResult.value?.confidence ?? null
+  })
+}
+
+function onCandidateSelect(candidate, index) {
+  selectedBreed.value = candidate.breed
+  trackEvent(EVENTS.BREED_SELECTED, {
+    select_source: 'candidate',
+    candidate_index: index + 1,
+    breed: candidate.breed,
+    confidence: candidate.confidence
+  })
+}
+
+function onBreedOptionSelect(breed, source) {
+  selectedBreed.value = breed
+  trackEvent(EVENTS.BREED_SELECTED, {
+    select_source: source,
+    breed
+  })
+}
+
+function getConfidenceBucket(confidence = 0) {
+  if (confidence >= 0.8) return 'high'
+  if (confidence >= 0.5) return 'medium'
+  return 'low'
 }
 </script>
 
@@ -331,6 +416,17 @@ function goNext() {
 .result-section {
   width: 100%;
   margin-top: 24px;
+}
+
+.demo-mode-tip {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff4df;
+  border: 1px solid rgba(255, 185, 97, 0.38);
+  color: #7e5528;
+  font-size: 13px;
+  text-align: left;
 }
 
 .result-card {
@@ -532,5 +628,9 @@ function goNext() {
   margin: 0 auto;
   padding: 16px 20px;
   background: linear-gradient(transparent, var(--bg) 30%);
+}
+
+.btn-with-gap {
+  margin-top: 10px;
 }
 </style>

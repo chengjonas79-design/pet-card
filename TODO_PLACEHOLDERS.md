@@ -10,7 +10,8 @@
 |--------|------|-----------|
 | `VITE_CLOUDBASE_ENV_ID` | 腾讯云 CloudBase 环境ID | 腾讯云控制台 → 云开发 → 环境ID |
 | `VITE_WX_APPID` | 微信公众号 AppID | 微信公众平台 → 开发 → 基本配置 |
-| `DASHSCOPE_API_KEY` | 通义千问 API Key | 阿里云 → DashScope → API-KEY管理 |
+| `CLOUDBASE_AI_MODEL_GROUP` | CloudBase AI 模型分组 | CloudBase 控制台 → AI → 大模型接入 |
+| `CLOUDBASE_AI_MODEL_NAME` | CloudBase AI 模型名称 | CloudBase 控制台 → AI → 大模型接入 |
 
 文件位置: `pet-card/.env`
 
@@ -59,7 +60,7 @@
 
 | 云函数 | 目录 | 环境变量 |
 |--------|------|----------|
-| `breed-identify` | `cloudfunctions/breed-identify/` | 需配置 `DASHSCOPE_API_KEY` |
+| `breed-identify` | `cloudfunctions/breed-identify/` | 需配置 `CLOUDBASE_AI_MODEL_GROUP`、`CLOUDBASE_AI_MODEL_NAME` |
 | `track-event` | `cloudfunctions/track-event/` | 无 |
 | `user-profile` | `cloudfunctions/user-profile/` | 无 |
 

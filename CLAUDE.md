@@ -14,7 +14,7 @@
 |------|------|
 | 前端 | Vue 3 + Vite 7 |
 | 后端 | 腾讯云 CloudBase 云开发 |
-| 品种识别 | 通义千问VL (qwen-vl-plus) |
+| 品种识别 | CloudBase AI（默认混元视觉模型） |
 | 名片渲染 | Canvas（玩梗系风格，1080×1920px） |
 | 进群方式 | 统一企微二维码，话术引导分群 |
 
@@ -32,7 +32,7 @@ pet-card/
 
 ## 上线前待办
 详见 `pet-card/TODO_PLACEHOLDERS.md`，核心是:
-1. `.env` 填真实配置（CloudBase环境ID、微信AppID、通义千问API Key）
+1. `.env` 填真实配置（CloudBase环境ID、微信AppID、CloudBase AI 模型配置）
 2. 放入企微二维码图片
 3. CloudBase创建数据库集合 + 部署云函数
 4. 微信公众号配置安全域名

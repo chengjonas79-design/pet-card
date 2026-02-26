@@ -9,12 +9,40 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { trackEvent, EVENTS } from './utils/tracking'
+import { onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { trackEvent, trackFunnel, trackViralEntryIfNeeded, EVENTS, FUNNEL_STEPS } from './utils/tracking'
+
+const route = useRoute()
+
+watch(
+  () => route.fullPath,
+  () => {
+    trackEvent(EVENTS.PAGE_VIEW, {
+      route_name: route.name || '',
+      page_path: route.path
+    })
+
+    const step = getRouteFunnelStep(route.path)
+    if (step) {
+      trackFunnel(step, {
+        route_name: route.name || ''
+      })
+    }
+  },
+  { immediate: true }
+)
 
 onMounted(() => {
-  trackEvent(EVENTS.PAGE_VIEW)
+  trackViralEntryIfNeeded()
 })
+
+function getRouteFunnelStep(path) {
+  if (path === '/') return FUNNEL_STEPS.LANDING
+  if (path === '/info') return FUNNEL_STEPS.INFO_VIEW
+  if (path === '/card') return FUNNEL_STEPS.CARD_VIEW
+  return ''
+}
 </script>
 
 <style>

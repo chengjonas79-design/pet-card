@@ -1,14 +1,24 @@
 import cloudbase from '@cloudbase/js-sdk'
 
 let app = null
+const ENV_ID = import.meta.env.VITE_CLOUDBASE_ENV_ID || ''
+const IS_CLOUDBASE_READY = Boolean(ENV_ID && !ENV_ID.includes('your-'))
 
 export function getCloudbaseApp() {
+  if (!IS_CLOUDBASE_READY) {
+    throw new Error('cloudbase_env_not_configured')
+  }
+
   if (!app) {
     app = cloudbase.init({
-      env: import.meta.env.VITE_CLOUDBASE_ENV_ID
+      env: ENV_ID
     })
   }
   return app
+}
+
+export function isCloudbaseReady() {
+  return IS_CLOUDBASE_READY
 }
 
 // 调用云函数
