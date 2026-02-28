@@ -20,6 +20,7 @@ npm run dev
 在 `.env` 中配置：
 ```bash
 VITE_MOCK_BREED_IDENTIFY=true
+VITE_MOCK_PET_INSIGHT=true
 ```
 
 说明：
@@ -35,6 +36,7 @@ VITE_MOCK_BREED_IDENTIFY=true
 ## 云函数
 目录：`cloudfunctions/`
 - `breed-identify`：品种识别
+- `pet-insight`：AI性格解读/分享话术
 - `track-event`：埋点上报
 - `user-profile`：用户建档、邀请奖励、进群意向
 
@@ -57,6 +59,7 @@ npm run build
 2. 部署云函数（示例）
 ```bash
 tcb fn deploy breed-identify
+tcb fn deploy pet-insight
 tcb fn deploy track-event
 tcb fn deploy user-profile
 ```
@@ -64,5 +67,6 @@ tcb fn deploy user-profile
 
 ## 文档
 - 交付说明：`docs/growth-delivery-2026q1.md`
+- 微信H5裂变方案：`docs/h5-wechat-growth-plan-2026q1.md`
 - 上线占位清单：`TODO_PLACEHOLDERS.md`
 - 产品方案：`萌宠联萌_同品种社交名片_产品方案_V3终版.md`

@@ -19,6 +19,11 @@ const routes = [
     path: '/card',
     name: 'CardPreview',
     component: () => import('../views/CardPreview.vue')
+  },
+  {
+    path: '/private',
+    name: 'PrivateEntry',
+    component: () => import('../views/PrivateEntry.vue')
   }
 ]
 

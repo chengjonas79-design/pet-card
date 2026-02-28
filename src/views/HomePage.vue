@@ -127,6 +127,10 @@
           </div>
         </div>
       </div>
+
+      <div class="logic-tip">
+        AI 这一步只做“品种识别”。下一步会通过 3 个行为问题生成性格标签。
+      </div>
     </div>
 
     <!-- 错误提示 -->
@@ -139,11 +143,8 @@
 
     <!-- 下一步按钮 -->
     <div v-if="canProceed" class="action-bar safe-bottom">
-      <button class="btn-primary" @click="goQuickGenerate">
-        30秒生成可分享卡 ⚡
-      </button>
-      <button class="btn-secondary btn-with-gap" @click="goNext">
-        完善资料再生成 ✏️
+      <button class="btn-primary" @click="goNext">
+        下一步：回答3题生成性格标签
       </button>
     </div>
   </div>
@@ -250,7 +251,8 @@ function goNext() {
   const data = {
     photoUrl: photoPreview.value,
     breed: finalBreed.value,
-    breedModified: identifyResult.value?.breed !== finalBreed.value
+    breedModified: identifyResult.value?.breed !== finalBreed.value,
+    identifyConfidence: identifyResult.value?.confidence || 0
   }
 
   trackEvent(EVENTS.NEXT_TO_INFO, {
@@ -266,36 +268,6 @@ function goNext() {
   // 使用 sessionStorage 传递数据（避免 URL 过长）
   sessionStorage.setItem('pet_card_data', JSON.stringify(data))
   router.push('/info')
-}
-
-function goQuickGenerate() {
-  const breed = finalBreed.value
-  const data = {
-    photoUrl: photoPreview.value,
-    breed,
-    breedModified: identifyResult.value?.breed !== breed,
-    nickname: '我家毛孩子',
-    gender: '不确定',
-    age: '保密',
-    city: '同城',
-    tags: ['社交牛牛', '撒娇达人', '拍照模特'],
-    signature: '',
-    availableTime: '',
-    quickMode: true,
-    templateStyle: 'meme'
-  }
-
-  trackEvent(EVENTS.QUICK_GENERATE_CLICKED, {
-    breed,
-    confidence_bucket: getConfidenceBucket(identifyResult.value?.confidence)
-  })
-
-  trackFunnel(FUNNEL_STEPS.HOME_TO_CARD_QUICK, {
-    breed
-  })
-
-  sessionStorage.setItem('pet_card_data', JSON.stringify(data))
-  router.push('/card')
 }
 
 function openManualSelect(triggerFrom) {
@@ -630,7 +602,14 @@ function getConfidenceBucket(confidence = 0) {
   background: linear-gradient(transparent, var(--bg) 30%);
 }
 
-.btn-with-gap {
-  margin-top: 10px;
+.logic-tip {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff8ed;
+  border: 1px solid rgba(255, 196, 134, 0.42);
+  color: #8a6d5a;
+  font-size: 13px;
+  text-align: left;
 }
 </style>

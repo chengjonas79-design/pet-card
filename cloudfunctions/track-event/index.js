@@ -18,6 +18,9 @@ exports.main = async (event) => {
 
   try {
     const timestamp = Number.isFinite(params.timestamp) ? params.timestamp : Date.now()
+    const source = params.src || params.source || 'direct'
+    const campaign = params.campaign || params.utm_campaign || ''
+    const contentId = params.content_id || params.utm_content || ''
 
     const res = await db.collection('events').add({
       event: eventName,
@@ -27,7 +30,10 @@ exports.main = async (event) => {
       sessionId: params.session_id || '',
       funnelStep: params.funnel_step || '',
       pagePath: params.page_path || '',
-      source: params.source || 'direct',
+      source,
+      src: source,
+      campaign,
+      contentId,
       shareId: params.share_id || '',
       inviterId: params.inviter_id || '',
       isSharedEntry: Boolean(params.is_shared_entry),

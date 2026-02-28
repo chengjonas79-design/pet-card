@@ -73,9 +73,6 @@ export function useCardGenerator() {
       // 品种名称（大字 + 装饰）
       drawBreedName(ctx, cardData.breed, templateStyle)
 
-      // 增长向传播指标
-      drawViralHighlights(ctx, cardData.viralProfile, templateStyle)
-
       // 宠物信息
       drawPetInfo(ctx, cardData)
 
@@ -369,16 +366,16 @@ function drawViralHighlights(ctx, profile, style) {
 }
 
 function drawPetInfo(ctx, data) {
-  const startY = 890
+  const startY = 790
+  const personalityTitle = data?.personalityProfile?.title || '稳定陪伴型'
   const items = [
     { label: '昵称', value: data.nickname, icon: '💫' },
-    { label: '性别', value: data.gender, icon: data.gender === '弟弟' ? '♂️' : data.gender === '妹妹' ? '♀️' : '❓' },
-    { label: '年龄', value: data.age, icon: '🎂' },
+    { label: '性格', value: personalityTitle, icon: '🧠' },
     { label: '坐标', value: data.city, icon: '📍' }
   ]
 
-  if (data.availableTime) {
-    items.push({ label: '可约', value: data.availableTime, icon: '📅' })
+  if (data.age && data.age !== '保密') {
+    items.push({ label: '年龄', value: data.age, icon: '🎂' })
   }
 
   // 信息卡片背景
@@ -413,7 +410,7 @@ function drawPetInfo(ctx, data) {
 function drawTags(ctx, tags) {
   if (!tags || tags.length === 0) return
 
-  const y = 1270
+  const y = 1080
   ctx.textAlign = 'center'
   ctx.font = '900 22px "PingFang SC", sans-serif'
   ctx.fillStyle = '#2D2A26'
@@ -454,7 +451,7 @@ function drawTags(ctx, tags) {
 }
 
 function drawSignature(ctx, signature) {
-  const y = 1410
+  const y = 1220
 
   ctx.textAlign = 'center'
   ctx.font = 'italic 26px "PingFang SC", sans-serif'
@@ -463,7 +460,7 @@ function drawSignature(ctx, signature) {
 }
 
 async function drawFooter(ctx, breed, style) {
-  const y = 1480
+  const y = 1300
 
   // 进群 CTA 区域背景
   roundRect(ctx, 60, y + 30, 960, 320, 20)

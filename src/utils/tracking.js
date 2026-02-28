@@ -31,12 +31,19 @@ export const EVENTS = {
   TEMPLATE_LOCKED_CLICKED: 'template_locked_clicked',
   SHARE_LINK_CREATED: 'share_link_created',
   SHARE_LINK_COPIED: 'share_link_copied',
+  SHARE_ASSET_SELECTED: 'share_asset_selected',
+  SHARE_ASSET_TEXT_COPIED: 'share_asset_text_copied',
   SHARE_TEXT_COPIED: 'share_text_copied',
   SHARE_COPY_FAILED: 'share_copy_failed',
+  AI_INSIGHT_STARTED: 'ai_insight_started',
+  AI_INSIGHT_GENERATED: 'ai_insight_generated',
+  AI_INSIGHT_FALLBACK_USED: 'ai_insight_fallback_used',
   REFERRAL_CONVERTED: 'referral_converted',
   REFERRAL_REWARD_UNLOCKED: 'referral_reward_unlocked',
   CARD_SAVED: 'card_saved',
   COMPARISON_VIEWED: 'comparison_viewed',
+  PRIVATE_CTA_CLICKED: 'private_cta_clicked',
+  PRIVATE_PAGE_VIEW: 'private_page_view',
   GROUP_CTA_SCAN: 'group_cta_scan',
   GROUP_INTENT_SUBMITTED: 'group_intent_submitted'
 }
@@ -113,8 +120,12 @@ export function createShareLink(extraParams = {}) {
   const inviterId = getInviterProfileId(tracking.visitor_id)
   const basePath = import.meta.env.BASE_URL || '/'
   const url = new URL(basePath, window.location.origin)
+  const source = extraParams.src || tracking.src || 'wx_share'
 
-  url.searchParams.set('source', 'share_card')
+  url.searchParams.set('src', source)
+  url.searchParams.set('source', source)
+  url.searchParams.set('campaign', extraParams.campaign || tracking.campaign || 'pet_card_h5')
+  url.searchParams.set('content_id', extraParams.content_id || tracking.content_id || 'card')
   url.searchParams.set('share_id', shareId)
   url.searchParams.set('inviter_id', inviterId)
 
@@ -148,17 +159,23 @@ export function getAttributionContext() {
   const params = new URLSearchParams(window.location.search)
   const shareId = params.get('share_id') || ''
   const inviterId = params.get('inviter_id') || ''
-  const source =
+  const src =
+    params.get('src') ||
     params.get('source') ||
     params.get('utm_source') ||
     (shareId || inviterId ? 'share' : 'direct')
+  const campaign = params.get('campaign') || params.get('utm_campaign') || ''
+  const contentId = params.get('content_id') || params.get('utm_content') || ''
 
   const attribution = {
-    source,
+    source: src,
+    src,
+    campaign,
+    content_id: contentId,
     referrer: params.get('ref') || document.referrer || '',
     utm_medium: params.get('utm_medium') || '',
-    utm_campaign: params.get('utm_campaign') || params.get('campaign') || '',
-    utm_content: params.get('utm_content') || '',
+    utm_campaign: campaign,
+    utm_content: contentId,
     share_id: shareId,
     inviter_id: inviterId,
     is_shared_entry: Boolean(shareId || inviterId),
@@ -178,6 +195,9 @@ function getTrackingContext() {
     visitor_id: getOrCreateLocalValue(STORAGE_KEYS.VISITOR_ID, 'vid'),
     session_id: getOrCreateSessionValue(STORAGE_KEYS.SESSION_ID, 'sid'),
     source: attribution.source,
+    src: attribution.src,
+    campaign: attribution.campaign,
+    content_id: attribution.content_id,
     referrer: attribution.referrer,
     utm_medium: attribution.utm_medium,
     utm_campaign: attribution.utm_campaign,
